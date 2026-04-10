@@ -1,0 +1,42 @@
+# Compiled output
+target/
+*.class
+*.jar
+*.war
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.eml
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets — never commit
+.env
+*.env
+*.pem
+*.key
+secrets/
+
+# Log files
+logs/
+*.log
+spring.log
+
+# Maven wrapper
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# Test outputs
+surefire-reports/
+
+# Docker volumes (if mounted locally)
+postgres-data/
+redis-data/
