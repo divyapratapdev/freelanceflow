@@ -9,6 +9,8 @@ import com.freelanceflow.invoice.dto.InvoiceResponse;
 import com.freelanceflow.invoice.dto.InvoiceUpdateRequest;
 import com.freelanceflow.project.ProjectRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -23,8 +25,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class InvoiceService {
 
+    private static final Logger log = LoggerFactory.getLogger(InvoiceService.class);
+
+    /* 
+     * [DESIGN NOTE] Architectural Choice:
+     * We use a dedicated repository for persistence but decouple the long-running 
+     * processes (Notification, PDF Generation) via Kafka to maintain a <200ms API response time.
+     */
     private final InvoiceRepository invoiceRepository;
     private final ClientRepository clientRepository;
     private final ProjectRepository projectRepository;
@@ -42,6 +52,7 @@ public class InvoiceService {
     public InvoiceResponse create(Long userId, InvoiceRequest request) {
         MDC.put("userId", String.valueOf(userId));
         try {
+            // client ownership check — catches cases where clientId belongs to a different user
             if (!clientRepository.existsByIdAndUserId(request.getClientId(), userId)) {
                 throw new EntityNotFoundException("Client not found: " + request.getClientId());
             }
@@ -52,6 +63,7 @@ public class InvoiceService {
                 }
             }
 
+            // TODO: add GST type validation (IGST vs CGST+SGST) based on client state
             Invoice invoice = new Invoice();
             invoice.setUserId(userId);
             invoice.setClientId(request.getClientId());
@@ -167,6 +179,11 @@ public class InvoiceService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         invoice.setSubtotal(subtotal);
 
+        /* 
+         * [DESIGN NOTE] Floating-point precision:
+         * We use BigDecimal throughout the engine to avoid IEEE 754 rounding errors 
+         * which are critical in financial SaaS applications.
+         */
         BigDecimal taxAmount = subtotal.multiply(invoice.getTaxPercent())
                 .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
         invoice.setTaxAmount(taxAmount);

@@ -1,0 +1,17 @@
+spring:
+  mail:
+    host: localhost
+    port: 25
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
+  
+management:
+  health:
+    mail:
+      enabled: false
+
+# Expert Demo Overrides
+grok:
+  api:
+    model: llama-3.1-8b-instant # Ensure consistency for demo
