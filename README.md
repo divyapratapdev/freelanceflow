@@ -5,6 +5,12 @@
   Automated invoicing · GST engine · Razorpay payments · Groq AI financial insights
 </p>
 
+<div align="center">
+
+**🔥 [Live Public API (Render Swagger UI)](https://freelanceflow-bxtt.onrender.com/swagger-ui/index.html)**
+
+</div>
+
 <p align="center">
   <img src="https://img.shields.io/badge/Java-17-blue?style=flat-square&logo=java" />
   <img src="https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen?style=flat-square&logo=springboot" />
