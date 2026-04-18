@@ -2,9 +2,9 @@ spring:
   application:
     name: freelanceflow
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/freelanceflow}
-    username: ${SPRING_DATASOURCE_USERNAME:${DB_USER:postgres}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:postgres}}
+    url: ${DB_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/freelanceflow}}
+    username: ${DB_USER:${SPRING_DATASOURCE_USERNAME:postgres}}
+    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:postgres}}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
