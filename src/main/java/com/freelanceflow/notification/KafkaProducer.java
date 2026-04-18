@@ -7,20 +7,22 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "app.kafka.enabled", havingValue = "true", matchIfMissing = true)
 public class KafkaProducer {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaProducer.class);
     
-    // We use <String, Object> because of spring.json.add.type.headers: true
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final java.util.Optional<KafkaTemplate<String, Object>> kafkaTemplate;
 
-    public KafkaProducer(KafkaTemplate<String, Object> kafkaTemplate) {
+    public KafkaProducer(java.util.Optional<KafkaTemplate<String, Object>> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
     public void sendMessage(String topic, String key, Object payload) {
-        log.info("Sending message to topic={}, key={}, payload={}", topic, key, payload.getClass().getSimpleName());
-        kafkaTemplate.send(topic, key, payload);
+        if (kafkaTemplate.isPresent()) {
+            log.info("Sending message to topic={}, key={}, payload={}", topic, key, payload.getClass().getSimpleName());
+            kafkaTemplate.get().send(topic, key, payload);
+        } else {
+            log.info("Kafka is disabled (Render Profile). Simulated sending msg to topic={}, key={}", topic, key);
+        }
     }
 }
