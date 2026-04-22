@@ -11,4 +11,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Page<Client> findByUserId(Long userId, Pageable pageable);
 
     boolean existsByIdAndUserId(Long id, Long userId);
+
+    java.util.Optional<Client> findByIdAndUserId(Long id, Long userId);
 }

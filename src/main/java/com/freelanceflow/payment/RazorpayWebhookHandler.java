@@ -36,21 +36,23 @@ public class RazorpayWebhookHandler {
     private final InvoiceRepository invoiceRepository;
     private final KafkaProducer kafkaProducer;
     private final com.freelanceflow.common.IdempotencyService idempotencyService;
+    private final org.springframework.context.ApplicationContext applicationContext;
 
     public RazorpayWebhookHandler(RazorpayConfig razorpayConfig,
                                   PaymentRepository paymentRepository,
                                   InvoiceRepository invoiceRepository,
                                   KafkaProducer kafkaProducer,
-                                  com.freelanceflow.common.IdempotencyService idempotencyService) {
+                                  com.freelanceflow.common.IdempotencyService idempotencyService,
+                                  org.springframework.context.ApplicationContext applicationContext) {
         this.razorpayConfig = razorpayConfig;
         this.paymentRepository = paymentRepository;
         this.invoiceRepository = invoiceRepository;
         this.kafkaProducer = kafkaProducer;
         this.idempotencyService = idempotencyService;
+        this.applicationContext = applicationContext;
     }
 
     @PostMapping("/api/payments/webhook")
-    @Transactional
     public ResponseEntity<String> handleWebhook(
             @RequestBody byte[] payloadBytes,
             @RequestHeader("X-Razorpay-Signature") String signature) {
@@ -70,8 +72,6 @@ public class RazorpayWebhookHandler {
                 if ("payment.captured".equals(event)) {
                     paymentEntity = json.getJSONObject("payload").getJSONObject("payment").getJSONObject("entity");
                 } else {
-                    paymentEntity = json.getJSONObject("payload").getJSONObject("order").getJSONObject("entity"); // or payment
-                    // In payment_link.paid, the payment entity is typically under payload.payment.entity
                     if (json.getJSONObject("payload").has("payment")) {
                         paymentEntity = json.getJSONObject("payload").getJSONObject("payment").getJSONObject("entity");
                     } else {
@@ -101,8 +101,8 @@ public class RazorpayWebhookHandler {
                 Invoice invoice = invoiceRepository.findById(invoiceId)
                         .orElseThrow(() -> new EntityNotFoundException("Invoice not found for webhook: " + invoiceId));
                 
-                // Evict Dashboard cache for this user
-                evictDashboardCache(invoice.getUserId());
+                // Evict Dashboard cache for this user by invoking through the proxy
+                applicationContext.getBean(RazorpayWebhookHandler.class).evictDashboardCache(invoice.getUserId());
 
                 Payment payment = new Payment();
                 payment.setInvoice(invoice);

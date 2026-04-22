@@ -27,7 +27,6 @@
         <openpdf.version>1.3.30</openpdf.version>
         <razorpay.version>1.4.5</razorpay.version>
         <testcontainers.version>1.19.8</testcontainers.version>
-        <spring-ai.version>1.0.0</spring-ai.version>
     </properties>
 
     <dependencyManagement>

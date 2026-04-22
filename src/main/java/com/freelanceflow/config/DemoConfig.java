@@ -19,7 +19,7 @@ public class DemoConfig {
         log.info("Initializing Dummy JavaMailSender for Demo Profile");
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("localhost");
-        mailSender.setPort(2525);
+        mailSender.setPort(25);
         return mailSender;
     }
 }

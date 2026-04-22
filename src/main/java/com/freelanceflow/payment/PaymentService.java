@@ -28,10 +28,12 @@ public class PaymentService {
 
     private final RazorpayClient razorpayClient;
     private final InvoiceRepository invoiceRepository;
+    private final com.freelanceflow.client.ClientRepository clientRepository;
 
-    public PaymentService(RazorpayClient razorpayClient, InvoiceRepository invoiceRepository) {
+    public PaymentService(RazorpayClient razorpayClient, InvoiceRepository invoiceRepository, com.freelanceflow.client.ClientRepository clientRepository) {
         this.razorpayClient = razorpayClient;
         this.invoiceRepository = invoiceRepository;
+        this.clientRepository = clientRepository;
     }
 
     @Transactional
@@ -43,7 +45,7 @@ public class PaymentService {
 
             JSONObject paymentLinkRequest = new JSONObject();
             // Amount in paise: Rs.1000 = 100000
-            int amountInPaise = invoice.getTotal().multiply(new BigDecimal("100")).intValueExact();
+            int amountInPaise = invoice.getTotal().multiply(new BigDecimal("100")).setScale(0, java.math.RoundingMode.HALF_UP).intValueExact();
             paymentLinkRequest.put("amount", amountInPaise);
             paymentLinkRequest.put("currency", "INR");
             paymentLinkRequest.put("accept_partial", false);
@@ -54,9 +56,12 @@ public class PaymentService {
             long expireBy = Instant.now().plus(30, ChronoUnit.DAYS).getEpochSecond();
             paymentLinkRequest.put("expire_by", expireBy);
             
+            com.freelanceflow.client.Client client = clientRepository.findByIdAndUserId(invoice.getClientId(), userId)
+                    .orElseThrow(() -> new EntityNotFoundException("Client not found for invoice"));
+
             JSONObject customer = new JSONObject();
-            customer.put("name", invoice.getUserId().toString()); // Mocking some name
-            customer.put("email", "client@example.com"); // We will use generic for now or fetch client email
+            customer.put("name", client.getName());
+            customer.put("email", client.getEmail());
             // Alternatively, can skip customer details if not mandatory, but usually it's good to have.
             
             JSONObject notes = new JSONObject();

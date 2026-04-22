@@ -42,7 +42,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/payments/webhook").permitAll()
                 .requestMatchers("/ws/**").permitAll()
-                .requestMatchers("/mcp/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health/**").permitAll()
